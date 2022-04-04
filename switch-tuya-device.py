@@ -27,7 +27,7 @@ __copyright__ = "Copyright 2021, bgeneto"
 __license__ = "GPLv3"
 __status__ = "Development"
 __date__ = "2022/04/04"
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 import argparse
 import json
@@ -127,10 +127,13 @@ def main():
     dev = get_device(devices, args.dev)
 
     # first we get switch status
+    dev_type = 'device22' if len(dev['id']) == 22 else 'default'
     if dev["type"] == "outlet":
-        d = tinytuya.OutletDevice(dev["id"], dev["ip"], dev["key"])
+        d = tinytuya.OutletDevice(dev["id"], dev["ip"], dev["key"], dev_type)
     elif dev["type"] == "bulb":
-        d = tinytuya.BulbDevice(dev["id"], dev["ip"], dev["key"])
+        d = tinytuya.BulbDevice(dev["id"], dev["ip"], dev["key"], dev_type)
+        d.set_dpsUsed({"20": None})
+    
     d.set_version(float(dev["ver"]))
     data = d.status()
 
@@ -145,7 +148,6 @@ def main():
     except:
         switch_state = data['dps']['20']
     
-    #print("switch_state=",switch_state)
     switch_cmd = args.cmd.strip().lower()
     now = str(datetime.utcnow())
     msg = now + "|turning %s device id %s"
@@ -177,4 +179,3 @@ def main():
 if __name__ == "__main__":
     ret = main()
     sys.exit(ret)
-
